@@ -271,7 +271,10 @@ public class JTextComponentRowHeader extends JPanel {
      */
     @Override
     public Dimension getPreferredSize() {
-        textComponentHeight = textComponent.getPreferredSize().height;
+        try {
+            textComponentHeight = textComponent.getPreferredSize().height;
+        } catch (Exception e) {
+        }
         return new Dimension(panelWidth, textComponentHeight);
     }
 
