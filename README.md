@@ -1,6 +1,8 @@
 ![](git-images/logo.png)
 
-Java source code viewer and decompiler. Using java swing. 
+# WIP !
+
+Source code viewer and java decompiler with swing gui, written on java.
 
 #### Screenshots
 ![](git-images/jv_1.png)
