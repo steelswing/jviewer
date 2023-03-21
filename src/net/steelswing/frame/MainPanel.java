@@ -12,7 +12,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTree;
 import net.steelswing.IconManager;
 import net.steelswing.frame.view.ImagePanel;
 import net.steelswing.frame.view.SyntaxPanel;
@@ -109,6 +111,26 @@ public class MainPanel extends javax.swing.JPanel {
 
             count++;
         }
+    }
+
+    public TreeHandler getTreeHandler() {
+        return treeHandler;
+    }
+
+    public Map<FileNode, Integer> getPages() {
+        return pages;
+    }
+
+    public JTree getProjectTree() {
+        return projectTree;
+    }
+
+    public JSplitPane getSplitMain() {
+        return splitMain;
+    }
+
+    public JTabbedPane getTabbedPanel() {
+        return tabbedPanel;
     }
 
     public MainFrame getMainFrame() {

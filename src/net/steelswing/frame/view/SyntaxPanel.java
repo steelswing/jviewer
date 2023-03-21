@@ -49,7 +49,7 @@ public class SyntaxPanel extends JPanel {
         // the SyntaxHighlighter parser
         String filename = fileNode.getFileName().toLowerCase();
 
-        if (filename.endsWith(".java") || filename.endsWith(".txt")) {
+        if (filename.endsWith(".class") || filename.endsWith(".java") || filename.endsWith(".txt")) {
             parser = new SyntaxHighlighterParser(new BrushJava());
         } else if (filename.endsWith(".xml") || filename.endsWith(".html") || filename.endsWith(".form")) {
             parser = new SyntaxHighlighterParser(new BrushXml());

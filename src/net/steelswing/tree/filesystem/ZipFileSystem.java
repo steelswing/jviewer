@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javax.swing.tree.DefaultTreeModel;
@@ -37,14 +38,16 @@ public class ZipFileSystem implements FileSystem {
     protected ZipInputStream zip;
     protected String fileName;
 
+    protected Map<String, byte[]> classes = new HashMap<>();
+
     public ZipFileSystem(File zipFile) throws FileNotFoundException {
-        this.zipFile = new FileInputStream(zipFile);
-        this.fileName = zipFile.getName();
+        this(new FileInputStream(zipFile), zipFile.getName());
     }
 
     public ZipFileSystem(InputStream zipFile, String fileName) {
         this.zipFile = zipFile;
         this.fileName = fileName;
+
     }
 
     @Override
@@ -61,7 +64,7 @@ public class ZipFileSystem implements FileSystem {
         if (zip == null) {
             zip = new ZipInputStream(zipFile);
         }
-        FileNode rootFileNode = new FileNode(new ZipFileEntry(true, rootNameOrNull == null ? fileName : rootNameOrNull, new byte[0]), true);
+        FileNode rootFileNode = new FileNode(new ZipFileEntry(true, rootNameOrNull == null ? fileName : rootNameOrNull, rootNameOrNull == null ? fileName : rootNameOrNull, new byte[0]), true);
         byte[] buffer = new byte[4096 * 4];
 
         Map<String, Pair<ZipEntry, ByteArrayOutputStream>> entries = new HashMap<>();
@@ -72,6 +75,9 @@ public class ZipFileSystem implements FileSystem {
                     stream.write(buffer, 0, len);
                 }
                 entries.put(entry.getName(), new Pair<>(entry, stream));
+                if (entry.getName().endsWith(".class")) {
+                    classes.put(entry.getName(), stream.toByteArray());
+                }
             } catch (Throwable e) {
                 SwingUtils.showErrorDialog("Failed to create tree from zip/jar", e);
             }
@@ -92,7 +98,7 @@ public class ZipFileSystem implements FileSystem {
 
                         FileNode child = root.getChild(string);
                         if (child == null) {
-                            root.addChild(child = new FileNode(new ZipFileEntry(entry.isDirectory(), string, stream.toByteArray())));
+                            root.addChild(child = new FileNode(new ZipFileEntry(entry.isDirectory(), key, string, stream.toByteArray())));
                         }
                         root = child;
                     }
@@ -114,7 +120,7 @@ public class ZipFileSystem implements FileSystem {
                         FileNode child = root.getChild(string);
                         if (child == null) {
                             final byte[] toByteArray = stream.toByteArray();
-                            child = new FileNode(new ZipFileEntry(entry.isDirectory(), string, toByteArray));
+                            child = new FileNode(new ZipFileEntry(entry.isDirectory(), key, string, toByteArray));
                             if (child.isZipArchive()) {
                                 child.setReadable(false);
                                 ZipFileSystem zipFileSystem = new ZipFileSystem(new ByteArrayInputStream(toByteArray), entry.getName());
@@ -135,6 +141,11 @@ public class ZipFileSystem implements FileSystem {
 
         zip.close();
         return rootFileNode;
+    }
+
+    @Override
+    public Set<Map.Entry<String, byte[]>> getClasses() {
+        return classes.entrySet();
     }
 
 

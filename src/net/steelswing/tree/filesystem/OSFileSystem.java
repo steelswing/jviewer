@@ -7,6 +7,12 @@ package net.steelswing.tree.filesystem;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.tree.DefaultTreeModel;
 import net.steelswing.IconManager;
 import net.steelswing.tree.ExplorerTreeNode;
@@ -23,6 +29,7 @@ import net.steelswing.tree.TreeObject;
 public class OSFileSystem implements FileSystem {
 
     private File folder;
+    protected Map<String, byte[]> classes = new HashMap<>();
 
     public OSFileSystem(File folder) {
         this.folder = folder;
@@ -38,6 +45,11 @@ public class OSFileSystem implements FileSystem {
         processFilesFromFolder(rootFileNode, folder);
         treeHandler.createTree(rootFileNode, root);
         expandTree(root, treeHandler);
+    }
+
+    @Override
+    public Set<Map.Entry<String, byte[]>> getClasses() {
+        return classes.entrySet();
     }
 
 
@@ -59,6 +71,14 @@ public class OSFileSystem implements FileSystem {
                 }
             }
             rootFileNode.addChild(child);
+            
+            if(entry.isFile() && entry.getName().endsWith(".class")) {
+                try {
+                    classes.put(entry.getAbsolutePath(), Files.readAllBytes(entry.toPath()));
+                } catch (IOException ex) {
+                    Logger.getLogger(OSFileSystem.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
 
         }
     }

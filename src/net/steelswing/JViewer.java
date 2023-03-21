@@ -6,6 +6,7 @@
 package net.steelswing;
 
 import com.formdev.flatlaf.FlatDarkLaf;
+import java.util.logging.Logger;
 import javax.swing.UIManager;
 import net.steelswing.frame.MainFrame;
 import net.steelswing.util.SwingUtils;
@@ -15,6 +16,8 @@ import net.steelswing.util.SwingUtils;
  * @author LWJGL2
  */
 public class JViewer {
+
+    private static final Logger LOG = Logger.getLogger(JViewer.class.getName());
 
     private static JViewer instance;
 
@@ -43,9 +46,36 @@ public class JViewer {
         } catch (Throwable e) {
             SwingUtils.showErrorDialog("Failed to set theme", e);
         }
+        initLogger();
 
+        LOG.info("Init JViewer");
         JViewer jViewer = new JViewer();
     }
 
+    protected static void initLogger() {
+        System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] [%4$-7s] %5$s %n");
+//        try {
+//            // Remove all the default handlers (usually just one console handler)
+//            Logger rootLogger = Logger.getLogger("");
+//            Handler[] rootHandlers = rootLogger.getHandlers();
+//            for (Handler handler : rootHandlers) {
+//                rootLogger.removeHandler(handler);
+//            }
+//
+//            // Add our own handler
+//            ConsoleHandler handler = new ConsoleHandler() {
+//                {
+//                    setOutputStream(System.out);
+//                }
+//            };
+//            handler.setLevel(Level.INFO);
+//            handler.setFormatter(new SimpleFormatter());
+//            rootLogger.addHandler(handler);
+//            rootLogger.setLevel(Level.INFO);
+//        } catch (Throwable e) {
+//            System.out.println("Failed to init logger!");
+//            e.printStackTrace();
+//        }
+    }
 
 }

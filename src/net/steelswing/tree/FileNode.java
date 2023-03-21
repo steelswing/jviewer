@@ -21,7 +21,7 @@ public class FileNode {
 
     protected String fileName;
     protected FileEntry file;
-    
+
     protected boolean isDir;
     protected boolean isRoot;
     protected boolean readable = true;
@@ -53,9 +53,9 @@ public class FileNode {
 
     public boolean isZipArchive() {
         String extension = getExtension();
-        return "zip".equals(extension) || "jar".equals(extension);
+        return "zip".equals(extension) || "jar".equals(extension) || "war".equals(extension);
     }
-    
+
     public String getExtension() {
         try {
             String[] split = fileName.split("\\.");
@@ -112,5 +112,10 @@ public class FileNode {
     public void setReadable(boolean readable) {
         this.readable = readable;
     }
- 
+
+    @Override
+    public String toString() {
+        return "FileNode{" + "children=" + children.size() + ", fileName=" + fileName + ", file=" + file + ", isDir=" + isDir + ", isRoot=" + isRoot + ", readable=" + readable + '}';
+    }
+
 }

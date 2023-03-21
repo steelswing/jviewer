@@ -47,6 +47,11 @@ public class OSFileEntry implements FileEntry {
         return file;
     }
 
+    @Override
+    public String getFullName() {
+        return file.getAbsolutePath();
+    }
+
     public static OSFileEntry of(File file) {
         return new OSFileEntry(file);
     }

@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import javax.swing.ImageIcon;
-import javax.swing.JDialog;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTree;
@@ -25,6 +24,7 @@ import javax.swing.tree.TreePath;
 import net.steelswing.IconManager;
 import net.steelswing.frame.MainPanel;
 import net.steelswing.frame.dialog.LoadMessagePanel;
+import net.steelswing.tree.decompiler.fernflower.FernFlowerDecompiler;
 import net.steelswing.tree.filesystem.FileEntry;
 import net.steelswing.tree.filesystem.FileSystem;
 import net.steelswing.util.JTreeUtil;
@@ -44,6 +44,8 @@ public class TreeHandler {
 
     private ExplorerTreeNode root;
 
+    private FernFlowerDecompiler decompiler;
+
     private List<File> files = new ArrayList<>();
     private final Comparator<FileNode> fileComparator = (a, b) -> {
         int dir = Boolean.compare(b.isDir(), a.isDir());
@@ -57,7 +59,6 @@ public class TreeHandler {
         this.panel = panel;
         this.tree = tree;
         this.fileSystem = fileSystem;
-
         tree.setCellRenderer(new ExplorerTreeRenderer());
         tree.setRootVisible(false);
         tree.setScrollsOnExpand(true);
@@ -94,8 +95,8 @@ public class TreeHandler {
         });
     }
 
-    public void createTree() {
-        JDialog loadDialog = LoadMessagePanel.showInfo(panel.getMainFrame(), "Creating tree", "Please wait");
+    public synchronized void createTree() {
+        LoadMessagePanel.LoadingMenuResult loadDialog = LoadMessagePanel.showInfo2(panel.getMainFrame(), "Creating tree", "Please wait");
         new Thread(() -> {
             try {
                 Thread.sleep(500);
@@ -103,11 +104,40 @@ public class TreeHandler {
             } catch (Throwable e) {
                 SwingUtils.showErrorDialog("Failed to create tree using " + fileSystem.getClass().getName(), e);
             }
-            loadDialog.dispose();
+            if (!panel.getMainFrame().getPreferences().isShowSubClasses()) {
+                removeSubclasses();
+            }
+
+            loadDialog.panel.getInfoLabel().setText("Preparing FernFlower...");
+            this.decompiler = new FernFlowerDecompiler(fileSystem);
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    this.decompiler.setup();
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+                while (loadDialog.dialog.isVisible()) {
+                    loadDialog.dialog.dispose();
+                }
+            });
+
         }).start();
     }
 
-    protected void onSelectPath(MouseEvent event, TreePath... paths) {
+    public synchronized void removeSubclasses() {
+        List<ExplorerTreeNode> nodes = JTreeUtil.<ExplorerTreeNode>getTreeNodes(tree);
+        DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+        for (ExplorerTreeNode node : nodes) {
+            if (node.getFileNode() != null) {
+                final String fileName = node.getFileNode().getFileName();
+                if (fileName.endsWith(".class") && fileName.contains("$")) {
+                    model.removeNodeFromParent(node);
+                }
+            }
+        }
+    }
+
+    protected synchronized void onSelectPath(MouseEvent event, TreePath... paths) {
         if (paths == null || paths.length < 1) {
             return;
         }
@@ -131,6 +161,7 @@ public class TreeHandler {
         ImageIcon icon = object.getIcon();
         try {
             System.out.println("Reading: " + fileNode.getFileName());
+
             try (InputStream stream = fileNode.file.getStream()) {
                 ByteArrayOutputStream output = new ByteArrayOutputStream();
                 final byte[] buffer = new byte[8096];
@@ -141,7 +172,20 @@ public class TreeHandler {
                 }
 
                 System.out.println("Done!");
-                panel.openFile(fileNode, icon, output.toString("UTF-8"));
+                String toString = output.toString("UTF-8");
+
+                if (fileNode.getExtension().equals("class")) {
+                    toString = "/* Failed to decompile */";
+                    try {
+                        if (decompiler != null) {
+                            toString = decompiler.decompile(fileNode.getFile().getFullName().replace(".class", ""));
+                        }
+                    } catch (Throwable e) {
+                        SwingUtils.showErrorDialog("Failed to decoimpile", e);
+                    }
+                }
+
+                panel.openFile(fileNode, icon, toString);
             }
         } catch (Exception e) {
             System.out.println("Failed to open file!");
@@ -150,7 +194,7 @@ public class TreeHandler {
 //        System.out.println(object + " " + fileNode.getFile());
     }
 
-    public void createTree(FileNode node, ExplorerTreeNode treeNode) {
+    public synchronized void createTree(FileNode node, ExplorerTreeNode treeNode) {
         if (node == null) {
             return;
         }
@@ -163,15 +207,15 @@ public class TreeHandler {
         }
     }
 
-    public ExplorerTreeNode getRoot() {
+    public synchronized ExplorerTreeNode getRoot() {
         return root;
     }
 
-    public ExplorerTreeNode createNode(FileNode node, TreeObject<String, FileEntry> object) {
+    public synchronized ExplorerTreeNode createNode(FileNode node, TreeObject<String, FileEntry> object) {
         return new ExplorerTreeNode(object).setFileNode(node);
     }
 
-    public ExplorerTreeNode getNode(TreePath path) {
+    public synchronized ExplorerTreeNode getNode(TreePath path) {
         ExplorerTreeNode node = (ExplorerTreeNode) path.getLastPathComponent();
         if (node == null) {
             return null;
@@ -182,12 +226,12 @@ public class TreeHandler {
         return node;
     }
 
-    public void addNode(ExplorerTreeNode root, ExplorerTreeNode node) {
+    public synchronized void addNode(ExplorerTreeNode root, ExplorerTreeNode node) {
         DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
         model.insertNodeInto(node, root, root.getChildCount());
     }
 
-    public void reloadNode(TreeNode node) {
+    public synchronized void reloadNode(TreeNode node) {
         DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
         model.reload(node);
     }
@@ -197,7 +241,7 @@ public class TreeHandler {
         return panel;
     }
 
-    public JTree getTree() {
+    public synchronized JTree getTree() {
         return tree;
     }
 
@@ -209,7 +253,7 @@ public class TreeHandler {
         return fileComparator;
     }
 
-    public void setRoot(ExplorerTreeNode root) {
+    public synchronized void setRoot(ExplorerTreeNode root) {
         this.root = root;
     }
 }

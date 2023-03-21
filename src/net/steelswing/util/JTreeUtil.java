@@ -45,14 +45,14 @@ public class JTreeUtil {
         }
     }
 
-    public static List<DefaultMutableTreeNode> getTreeNodes(JTree tree) {
-        List<DefaultMutableTreeNode> result = new ArrayList<>();
+    public static <T extends DefaultMutableTreeNode> List<T> getTreeNodes(JTree tree) {
+        List<T> result = new ArrayList<>();
 
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode) tree.getModel().getRoot();
+        T root = (T) tree.getModel().getRoot();
         Enumeration e = root.preorderEnumeration();
         while (e.hasMoreElements()) {
             try {
-                result.add((DefaultMutableTreeNode) e.nextElement());
+                result.add((T) e.nextElement());
             } catch (Exception ex) {
             }
         }

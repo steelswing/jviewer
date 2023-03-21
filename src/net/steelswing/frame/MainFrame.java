@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -23,8 +24,11 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.plaf.basic.BasicFileChooserUI;
 import net.steelswing.IconManager;
 import net.steelswing.JViewer;
+import net.steelswing.frame.preferences.Preferences;
 import net.steelswing.frame.view.SyntaxPanel;
 import net.steelswing.tree.filesystem.FileSystem;
 import net.steelswing.tree.filesystem.OSFileSystem;
@@ -49,9 +53,14 @@ public class MainFrame extends JFrame {
     protected JMenuItem menuBarCopy;
     protected JMenuItem menuBarSelectAll;
     protected JMenuItem menuBarFind;
+    protected JCheckBoxMenuItem menuBarShowSubclasses;
+
+    protected Preferences preferences;
 
     public MainFrame(JViewer main) throws Exception {
         this.main = main;
+        this.preferences = new Preferences(this);
+
         this.setTitle("JViewer");
         this.setLayout(new BorderLayout());
         this.initMenuBar();
@@ -91,7 +100,7 @@ public class MainFrame extends JFrame {
                 fileSystem = new OSFileSystem(file);
             } else {
                 String name = file.getName().toLowerCase();
-                if (name.endsWith(".zip") || name.endsWith(".jar")) {
+                if (name.endsWith(".zip") || name.endsWith(".jar") || name.endsWith(".war")) {
                     try {
                         fileSystem = new ZipFileSystem(file);
                         // TODO
@@ -119,6 +128,10 @@ public class MainFrame extends JFrame {
         this.add(mainPanel);
         this.revalidate();
         this.setUnlockMenuBar(true);
+    }
+
+    public Preferences getPreferences() {
+        return preferences;
     }
 
     public JViewer getMain() {
@@ -172,9 +185,48 @@ public class MainFrame extends JFrame {
                     }
                     menuBarEdit.addSeparator();
                     {
-                        JMenuItem menu = new JMenuItem("Preferences", IconManager.ICONS.EDIT_ICON16);
+                        JMenuItem menu = new JMenuItem("Preferences", IconManager.ICONS.COG_ICON16);
                         menu.addActionListener((e) -> openPreferences(e));
                         menuBarEdit.add(menu);
+                    }
+                }
+                menuBar.add(menuBarEdit);
+            }
+            {
+                JMenu menuBarEdit = new JMenu("View");
+                {
+                    {
+                        menuBarShowSubclasses = new JCheckBoxMenuItem("Show subclasses", IconManager.FORMATS.PAGE_JAVA_CLASSES_16ICON);
+                        menuBarShowSubclasses.addActionListener((e) -> preferences.setShowSubClasses(menuBarShowSubclasses.isSelected()));
+                        menuBarEdit.add(menuBarShowSubclasses);
+                    }
+                    menuBarEdit.addSeparator();
+                    {
+                        JMenu rootMenuItem = new JMenu("Decompiler");
+                        rootMenuItem.setIcon(IconManager.DECOMPILER.APP_FERNFLOWER_16ICON);
+                        {
+                            {
+                                JMenuItem item = new JMenuItem("Fernflower");
+                                rootMenuItem.add(item);
+                            }
+                            {
+                                JMenuItem item = new JMenuItem("CFR");
+                                rootMenuItem.add(item);
+                            }
+                            {
+                                JMenuItem item = new JMenuItem("Procyon");
+                                rootMenuItem.add(item);
+                            }
+                            rootMenuItem.addSeparator();
+                            {
+                                JMenuItem item = new JMenuItem("BYTECODE", IconManager.ICONS.ICON_CUP_16);
+                                rootMenuItem.add(item);
+                            }
+//                            languageLookup.put(Languages.java().getName(), Languages.java());
+//                            languageLookup.put(Languages.bytecode().getName(), Languages.bytecode());
+//                            languageLookup.put(Languages.bytecodeAst().getName(), Languages.bytecodeAst());
+                        }
+                        menuBarEdit.add(rootMenuItem);
                     }
                 }
                 menuBar.add(menuBarEdit);
@@ -183,20 +235,29 @@ public class MainFrame extends JFrame {
         this.setJMenuBar(menuBar);
     }
 
+
     protected void setUnlockMenuBar(boolean unlock) {
         this.menuBarCloseFile.setEnabled(unlock);
         this.menuBarCopy.setEnabled(unlock);
         this.menuBarSelectAll.setEnabled(unlock);
         this.menuBarFind.setEnabled(unlock);
+        this.menuBarShowSubclasses.setEnabled(unlock);
     }
 
     private void openProjectActionPerformed(ActionEvent evt) {
         File file = new File(".");
-//        if (main.getJsonConfig().has("lastFolder")) {
-//            file = new File(main.getJsonConfig().getString("lastFolder"));
-//        }
         JFileChooser chooser = new JFileChooser(file);
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setCurrentDirectory(file);
+        chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+        chooser.setFileFilter(new FileNameExtensionFilter("File archives or directories (*.zip, *.jar, *.war)", "zip", "jar", "war"));
+        try {
+            if (chooser.getUI() instanceof BasicFileChooserUI) {
+                BasicFileChooserUI basicFileChooserUI = (BasicFileChooserUI) chooser.getUI();
+                basicFileChooserUI.setFileName(".");
+            }
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
         chooser.showDialog(this, "Open File...");
 
         if (chooser.getSelectedFile() != null) {
@@ -234,4 +295,6 @@ public class MainFrame extends JFrame {
 
     private void openPreferences(ActionEvent e) {
     }
+
+
 }

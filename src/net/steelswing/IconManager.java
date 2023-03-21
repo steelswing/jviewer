@@ -45,6 +45,8 @@ public class IconManager {
         public static final ImageIcon ICON_MAGNIFIER_16;
         public static final ImageIcon ICON_MAGNIFIER_GO_16;
 
+        public static final ImageIcon ICON_CUP_16;
+
         static {
             // FILE FORMATS 16x16 
             ICON = new ImageIcon(IconManager.class.getResource("/assets/used/icons/icon.png"));
@@ -70,6 +72,8 @@ public class IconManager {
 
             ICON_MAGNIFIER_16 = new ImageIcon(IconManager.class.getResource("/assets/used/old/magnifier.png"));
             ICON_MAGNIFIER_GO_16 = new ImageIcon(IconManager.class.getResource("/assets/used/old/magnifier_go.png"));
+
+            ICON_CUP_16 = new ImageIcon(IconManager.class.getResource("/assets/used/cup.png"));
         }
     }
 
@@ -80,6 +84,7 @@ public class IconManager {
         public static final ImageIcon PAGE_GLSL_16ICON;
         public static final ImageIcon PAGE_JAVA_16ICON;
         public static final ImageIcon PAGE_JAVA_CLASS_16ICON;
+        public static final ImageIcon PAGE_JAVA_CLASSES_16ICON;
         public static final ImageIcon PAGE_JSON_16ICON;
         public static final ImageIcon PAGE_OBJ_16ICON;
         public static final ImageIcon PAGE_PICTURE_16ICON;
@@ -94,6 +99,7 @@ public class IconManager {
             PAGE_GLSL_16ICON = new ImageIcon(IconManager.class.getResource("/assets/used/page/page_glsl.png"));
             PAGE_JAVA_16ICON = new ImageIcon(IconManager.class.getResource("/assets/used/page/page_java.png"));
             PAGE_JAVA_CLASS_16ICON = new ImageIcon(IconManager.class.getResource("/assets/used/page/page_java_class.png"));
+            PAGE_JAVA_CLASSES_16ICON = new ImageIcon(IconManager.class.getResource("/assets/used/page/page_java_classes.png"));
             PAGE_JSON_16ICON = new ImageIcon(IconManager.class.getResource("/assets/used/page/page_json.png"));
             PAGE_OBJ_16ICON = new ImageIcon(IconManager.class.getResource("/assets/used/page/page_obj.png"));
             PAGE_PICTURE_16ICON = new ImageIcon(IconManager.class.getResource("/assets/used/page/page_picture.png"));
@@ -474,6 +480,20 @@ public class IconManager {
 
         static {
             PAGE_SCRIPT_16ICON = new ImageIcon(IconManager.class.getResource("/assets/used/page/script.png"));
+        }
+    }
+    
+    public static final class DECOMPILER {
+
+        public static final ImageIcon APP_FERNFLOWER_16ICON;
+        public static final ImageIcon APP_CFR_16ICON;
+        public static final ImageIcon APP_PROCYON_16ICON;
+
+
+        static {
+            APP_FERNFLOWER_16ICON = new ImageIcon(IconManager.class.getResource("/assets/used/decompiler/fernflower.png"));
+            APP_CFR_16ICON = new ImageIcon(IconManager.class.getResource("/assets/used/decompiler/cfr.png"));
+            APP_PROCYON_16ICON = new ImageIcon(IconManager.class.getResource("/assets/used/decompiler/procyon.png"));
         }
     }
 }

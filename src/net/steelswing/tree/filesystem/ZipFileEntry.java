@@ -17,11 +17,13 @@ import java.io.InputStream;
 public class ZipFileEntry implements FileEntry {
 
     protected boolean directory;
-    protected String  name;
+    protected String name;
+    protected String fullPath;
     protected byte[] bytes;
 
-    public ZipFileEntry(boolean directory, String name, byte[] bytes) {
+    public ZipFileEntry(boolean directory, String fullPath, String name, byte[] bytes) {
         this.directory = directory;
+        this.fullPath = fullPath;
         this.name = name;
         this.bytes = bytes;
     }
@@ -45,6 +47,11 @@ public class ZipFileEntry implements FileEntry {
     @Override
     public long length() {
         return bytes.length;
+    }
+
+    @Override
+    public String getFullName() {
+        return fullPath;
     }
 
     @Override

@@ -5,6 +5,8 @@
 
 package net.steelswing.tree.filesystem;
 
+import java.util.Map;
+import java.util.Set;
 import javax.swing.tree.TreePath;
 import net.steelswing.tree.ExplorerTreeNode;
 import net.steelswing.tree.TreeHandler;
@@ -26,4 +28,6 @@ public interface FileSystem {
             treeHandler.getTree().expandPath(new TreePath(childAt.getPath()));
         }
     }
+
+    public Set<Map.Entry<String, byte[]>> getClasses();
 }

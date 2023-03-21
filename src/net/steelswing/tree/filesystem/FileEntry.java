@@ -22,4 +22,6 @@ public interface FileEntry {
     public InputStream getStream() throws Exception;
 
     public long length();
+
+    public String getFullName();
 }
